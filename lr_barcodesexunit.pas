@@ -267,9 +267,6 @@ begin
     CenterRect.Right := CenterRect.Left + NewWidth;
     CenterRect.Bottom := CenterRect.Top + NewHeight;
 
-    //aCanvas. .Assign(tmpBitmap);
-    aCanvas.Pen.Color:=clWhite;
-    aCanvas.FillRect(DRect);
     aCanvas.StretchDraw(CenterRect, tmpBitmap);
     ShowFrame;
   finally
