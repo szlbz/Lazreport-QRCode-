@@ -10,7 +10,8 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, ExtCtrls,
-  StdCtrls, LR_Class,lr_const, LR_Utils, LR_DBRel, LResources, DelphiZXingQRCode;
+  StdCtrls, LR_Class, lr_const, LR_Utils, LR_DBRel, LResources,
+  DelphiZXingQRCode;
 
 type
 
@@ -205,7 +206,12 @@ var
   Row, Column: Integer;
   tmpBitmap: TBitmap;
   tmpEncoding: Integer;
-begin    
+
+  Ratio: Double;
+  NewWidth, NewHeight: Integer;
+  CenterRect: TRect;
+begin
+
   BeginDraw(aCanvas);
   CalcGaps;
   tmpQRCode := TDelphiZXingQRCode.Create;
@@ -238,7 +244,33 @@ begin
         end;
       end;
     end;
-    aCanvas.StretchDraw(DRect, tmpBitmap);
+    // 计算缩放比例
+    Ratio := tmpBitmap.Width / tmpBitmap.Height;
+
+    if (DRect.Right - DRect.Left) / Ratio <
+       (DRect.Bottom - DRect.Top) then
+    begin
+      // 适应宽度
+      NewWidth := DRect.Right - DRect.Left;
+      NewHeight := Round(NewWidth / Ratio);
+    end
+    else
+    begin
+      // 适应高度
+      NewHeight := DRect.Bottom - DRect.Top;
+      NewWidth := Round(NewHeight * Ratio);
+    end;
+
+    // 居中
+    CenterRect.Left := DRect.Left + (DRect.Right - DRect.Left - NewWidth) div 2;
+    CenterRect.Top := DRect.Top + (DRect.Bottom - DRect.Top - NewHeight) div 2;
+    CenterRect.Right := CenterRect.Left + NewWidth;
+    CenterRect.Bottom := CenterRect.Top + NewHeight;
+
+    //aCanvas. .Assign(tmpBitmap);
+    aCanvas.Pen.Color:=clWhite;
+    aCanvas.FillRect(DRect);
+    aCanvas.StretchDraw(CenterRect, tmpBitmap);
     ShowFrame;
   finally
     tmpQRCode.Free;
